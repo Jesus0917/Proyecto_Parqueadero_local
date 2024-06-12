@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% block title %}Placas{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Listado de Placas</h1>
+    <form method="POST" action="{{ url_for('placa.buscar_placa') }}" class="d-flex mb-3">
+        <input class="form-control me-2" type="search" placeholder="Buscar por placa" aria-label="Buscar" name="query">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+    </form>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Placa</th>
+                <th>Fecha y Hora</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for placa in placas %}
+            <tr>
+                <td>{{ placa.id }}</td>
+                <td>{{ placa.placa }}</td>
+                <td>{{ placa.fecha_hora }}</td>
+                <td>
+                    <img src="data:image/jpeg;base64,{{ placa.imagen | b64encode }}" alt="Imagen de la Placa" width="100" class="img-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImage('data:image/jpeg;base64,{{ placa.imagen | b64encode }}')">
+                </td>
+                <td>
+                    <form action="{{ url_for('placa.eliminar_placa', id=placa.id) }}" method="POST" style="display:inline-block;" class="delete-form">
+                        <button type="button" class="btn btn-danger btn-sm delete-button">Eliminar</button>
+                    </form>
+                    <form action="{{ url_for('placa.editar_placa', id=placa.id) }}" method="POST" style="display:inline-block;" class="edit-form">
+                        <input type="text" name="placa" value="{{ placa.placa }}" class="form-control form-control-sm edit-input" style="width: auto; display: inline-block;">
+                        <button type="button" class="btn btn-primary btn-sm edit-button">Editar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal para mostrar la imagen en grande -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Imagen de la Placa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="Imagen de la Placa" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showImage(src) {
+        document.getElementById('modalImage').src = src;
+    }
+
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const form = this.closest('.delete-form');
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción no se puede deshacer",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const form = this.closest('.edit-form');
+            const input = form.querySelector('.edit-input').value;
+            Swal.fire({
+                title: '¿Confirmar edición?',
+                text: "Vas a cambiar la placa a: " + input,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, editar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

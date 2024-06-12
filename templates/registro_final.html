@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% block title %}Registro Final{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Registro Final</h1>
+
+    <!-- Formulario de búsqueda -->
+    <form method="POST" action="{{ url_for('placa.mostrar_registro_final') }}">
+        <div class="row mb-3">
+            <div class="col">
+                <input type="text" name="placa" class="form-control" placeholder="Buscar por placa" value="{{ query if query }}">
+            </div>
+            <div class="col">
+                <input type="date" name="fecha_salida" class="form-control" placeholder="Fecha de salida">
+            </div>
+            <div class="col">
+                <button class="btn btn-primary" type="submit">Buscar</button>
+            </div>
+        </div>
+    </form>
+
+    <table id="registroFinalTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Placa</th>
+                <th>Fecha y Hora de Entrada</th>
+                <th>Imagen de Entrada</th>
+                <th>Fecha y Hora de Salida</th>
+                <th>Imagen de Salida</th>
+                <th>Tiempo en Parqueadero</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros %}
+            <tr>
+                <td>{{ registro.id }}</td>
+                <td>{{ registro.placa }}</td>
+                <td>{{ registro.fecha_hora_entrada }}</td>
+                <td>
+                    <img src="data:image/jpeg;base64,{{ registro.imagen_entrada | b64encode }}" alt="Imagen de Entrada" width="100" class="img-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModalEntrada" onclick="showImageEntrada('data:image/jpeg;base64,{{ registro.imagen_entrada | b64encode }}')">
+                </td>
+                <td>{{ registro.fecha_hora_salida }}</td>
+                <td>
+                    <img src="data:image/jpeg;base64,{{ registro.imagen_salida | b64encode }}" alt="Imagen de Salida" width="100" class="img-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModalSalida" onclick="showImageSalida('data:image/jpeg;base64,{{ registro.imagen_salida | b64encode }}')">
+                </td>
+                <td>
+                    {% set tiempo = registro.fecha_hora_salida - registro.fecha_hora_entrada %}
+                    {{ tiempo.days }} días, {{ tiempo.seconds // 3600 }} horas, {{ (tiempo.seconds // 60) % 60 }} minutos
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal para mostrar la imagen de entrada en grande -->
+<div class="modal fade" id="imageModalEntrada" tabindex="-1" aria-labelledby="imageModalEntradaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalEntradaLabel">Imagen de Entrada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImageEntrada" src="" alt="Imagen de Entrada" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar la imagen de salida en grande -->
+<div class="modal fade" id="imageModalSalida" tabindex="-1" aria-labelledby="imageModalSalidaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalSalidaLabel">Imagen de Salida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImageSalida" src="" alt="Imagen de Salida" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#registroFinalTable').DataTable({
+            "pageLength": 5
+        });
+    });
+
+    function showImageEntrada(src) {
+        document.getElementById('modalImageEntrada').src = src;
+    }
+
+    function showImageSalida(src) {
+        document.getElementById('modalImageSalida').src = src;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Flask-Bcrypt
+easyocr
+opencv-python
+PyMySQL
+pytz
+flask-login
+Flask-Session
